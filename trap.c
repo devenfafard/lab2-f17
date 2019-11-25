@@ -78,6 +78,25 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
 
+/* LAB 3 */
+  case T_PGFLT:
+    if((rcr = rcr2()) == -1)
+    {
+      myproc()->killed = -1;
+      break; 
+    }
+
+    if((sp = allocuvm(myproc()->pgdir, rcr - PGSIZE, rcr)) = 0)
+    {
+      myproc()->killed = 1;
+      exit(); 
+    }
+
+    myproc()->stackPages += 1;
+    cprintf("case T_PGFLT from trap.c: allocuvm succeeded. # of pages allocated: %d\n", myproc()->stackPages);
+    break;
+
+
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){

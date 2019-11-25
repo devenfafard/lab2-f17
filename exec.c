@@ -12,6 +12,7 @@ exec(char *path, char **argv)
 {
   char *s, *last;
   int i, off;
+  // LAB 3
   uint argc, sz, sp, ustack[3+MAXARG+1];
   struct elfhdr elf;
   struct inode *ip;
@@ -62,11 +63,18 @@ exec(char *path, char **argv)
 
   // Allocate two pages at the next page boundary.
   // Make the first inaccessible.  Use the second as the user stack.
-  sz = PGROUNDUP(sz);
-  if((sz = allocuvm(pgdir, sz, sz + 2*PGSIZE)) == 0)
+
+  /* LAB 3 */
+  if((sp = allocuvm(pgdir, STACKTOP - PGSIZE, STACKTOP)) == 0)
+  {
     goto bad;
-  clearpteu(pgdir, (char*)(sz - 2*PGSIZE));
-  sp = sz;
+  }
+
+ // sz = PGROUNDUP(sz);
+  //if((sz = allocuvm(pgdir, sz, sz + 2*PGSIZE)) == 0)
+   // goto bad;
+  //clearpteu(pgdir, (char*)(sz - 2*PGSIZE));
+  //sp = sz;
 
   // Push argument strings, prepare rest of stack in ustack.
   for(argc = 0; argv[argc]; argc++) {

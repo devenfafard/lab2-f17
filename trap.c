@@ -36,9 +36,11 @@ idtinit(void)
 void
 trap(struct trapframe *tf)
 {
-  int stackBottomAddr;
-  int nextPageAddr;
+  //int stackBottomAddr;
+  //int nextPageAddr;
 
+  int rcr;
+ 
   if(tf->trapno == T_SYSCALL){
     if(myproc()->killed)
       exit();
@@ -83,20 +85,21 @@ trap(struct trapframe *tf)
 
 /* LAB 3 */
   case T_PGFLT:
-/*    if((rcr = rcr2()) == -1)
+
+    if((rcr = rcr2()) == -1)
     {
       myproc()->killed = -1;
       break; 
     }
 
-    if((sp = allocuvm(myproc()->pgdir, rcr - PGSIZE, rcr)) = 0)
+    if(allocuvm(myproc()->pgdir, rcr - PGSIZE, rcr) == 0)
     {
       myproc()->killed = 1;
       exit(); 
     }
-*/
 
-    stackBottomAddr = PGROUNDUP(STACKTOP - (( myproc()->stackPages) * PGSIZE ));
+
+ /*   stackBottomAddr = PGROUNDUP(STACKTOP - (( myproc()->stackPages) * PGSIZE ));
     nextPageAddr    = PGROUNDUP(STACKTOP - (( myproc()->stackPages+1) * PGSIZE ));
   
     if(allocuvm(myproc()->pgdir, nextPageAddr, stackBottomAddr) == 0)
@@ -108,7 +111,7 @@ trap(struct trapframe *tf)
     {
       allocuvm(myproc()->pgdir, nextPageAddr, stackBottomAddr);
     }
-
+*/
     myproc()->stackPages += 1;
     cprintf("case T_PGFLT from trap.c: allocuvm succeeded. # of pages allocated: %d\n", myproc()->stackPages);
     break;

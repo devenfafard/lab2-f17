@@ -34,10 +34,10 @@ int shm_open(int id, char **pointer) {
 
 acquire(&(shm_table.lock));
 
-unsigned int i= 0;
+unsigned int i = 0;
 unsigned int found = 0;
 
-for(i = 0; i < 64; i++)
+for(i = 0; i < 64; i++) // Look through the page table to see if the segment id already exists.
 {
   if(shm_table.shm_pages[i].id == id)
   {
@@ -46,7 +46,7 @@ for(i = 0; i < 64; i++)
   }
 }
 
-if(!found)
+if(!found) // Breaks for the first page
 {
   for(i = 0; i < 64; i++)
   {
@@ -58,6 +58,7 @@ if(!found)
     }
   }
 
+  // If the segment id doesn't exist, allocate a page and store it in the table.
   char *mem;
 
   shm_table.shm_pages[i].id = id;
@@ -68,10 +69,10 @@ if(!found)
 
 struct proc *p = myproc();
 
-shm_table.shm_pages[i].refcnt += 1;
-mappages(p->pgdir, (void *)PGROUNDUP(p->sz), PGSIZE, V2P(shm_table.shm_pages[i].frame), PTE_W | PTE_U);
-*pointer = (char *)PGROUNDUP(p->sz);
-p->sz = PGROUNDUP(p->sz) + PGSIZE;
+shm_table.shm_pages[i].refcnt += 1; // Increase reference count
+mappages(p->pgdir, (void *)PGROUNDUP(p->sz), PGSIZE, V2P(shm_table.shm_pages[i].frame), PTE_W | PTE_U); // Add mapping between the virtual address and the physical address
+*pointer = (char *)PGROUNDUP(p->sz); // Return virtual address to pointer
+p->sz = PGROUNDUP(p->sz) + PGSIZE; // Update the size of the process
 
 release(&(shm_table.lock));
 
@@ -81,17 +82,17 @@ return 0; //added to remove compiler warning -- you should decide what to return
 
 
 int shm_close(int id) {
-/* LAB 4 */
 
+/* LAB 4 */
 acquire(&(shm_table.lock));
 
 unsigned int i;
 
-for (i = 0; i < 64; i++)
+for (i = 0; i < 64; i++) // If id exists, decrease the reference count. At 0, clear the table.
 {
   if(shm_table.shm_pages[i].id == id)
   {
-    if(shm_table.shm_pages[i].refnt > 1)
+    if(shm_table.shm_pages[i].refcnt > 1)
     {
       shm_table.shm_pages[i].refcnt -= 1;
     }
